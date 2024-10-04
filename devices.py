@@ -17,7 +17,7 @@ db_config = {
 }
 
 # Define the URL for the POST request
-url = "https://script.google.com/macros/s/AKfycbxNu27V2Y2LuKUIQMK8lX1y0joB6YmG6hUwB1fNeVbgzEh22TcDGrOak03Fk3uBHmz-/exec"  # Replace with the actual URL
+url = "https://script.google.com/macros/s/AKfycbxNu27V2Y2LuKUIQMK8lX1y0joB6YmG6hUwB1fNeVbgzEh22TcDGrOak03Fk3uBHmz-/exec" 
 
 # List of brand IDs and page numbers
 brand_ids = [1, 9, 36, 46, 48, 58, 80, 82, 95, 107]
