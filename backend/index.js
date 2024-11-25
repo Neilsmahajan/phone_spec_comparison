@@ -356,11 +356,76 @@ app.put('/devices/:deviceId', async (req, res) => {
 });
 
 // Endpoint to create a new device 
-//TODO: connect to db using query
+
 app.post('/devices', async (req, res) => {
   const newDevice = req.body;
-  console.log('New device:', newDevice);
-  res.status(201).json({ message: 'Device created successfully', device: newDevice });
+
+  try {
+    // Begin transaction
+    await pool.query('BEGIN');
+
+    // First insert into devices table
+    const insertDeviceQuery = `
+      INSERT INTO devices (device_id, device_name, device_image_url, brand_id)
+      VALUES ($1, $2, $3, $4)
+      RETURNING *
+    `;
+    
+    const deviceValues = [
+      newDevice.device_id,
+      newDevice.device_name,
+      newDevice.device_image_url,
+      newDevice.brand_id
+    ];
+
+    await pool.query(insertDeviceQuery, deviceValues);
+
+    // Then insert into device_details table
+    const insertDetailsQuery = `
+      INSERT INTO device_details (
+        device_id, device_name, device_image_url, display_size,
+        display_res, camera, video, ram, chipset, battery,
+        battery_type, release_date, body, os_type, storage, price
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+      RETURNING *
+    `;
+
+    const detailsValues = [
+      newDevice.device_id,
+      newDevice.device_name,
+      newDevice.device_image_url,
+      newDevice.display_size,
+      newDevice.display_res,
+      newDevice.camera,
+      newDevice.video,
+      newDevice.ram,
+      newDevice.chipset,
+      newDevice.battery,
+      newDevice.battery_type,
+      newDevice.release_date,
+      newDevice.body,
+      newDevice.os_type,
+      newDevice.storage,
+      newDevice.price
+    ];
+
+    const result = await pool.query(insertDetailsQuery, detailsValues);
+
+    // Commit transaction
+    await pool.query('COMMIT');
+
+    res.status(201).json({
+      message: 'Device created successfully',
+      device: result.rows[0]
+    });
+
+  } catch (error) {
+    // Rollback in case of error
+    await pool.query('ROLLBACK');
+    console.error('Error creating device:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 app.listen(port, () => {

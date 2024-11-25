@@ -1,0 +1,20 @@
+for add device
+{
+  "device_id": "samsung_s23_ultra",
+  "device_name": "Galaxy S23 Ultra",
+  "device_image_url": "https://example.com/s23-ultra.jpg",
+  "brand_id": 1,
+  "display_size": "6.8 inches",
+  "display_res": "3088 x 1440 pixels",
+  "camera": "200 MP + 10 MP + 10 MP + 12 MP",
+  "video": "8K@24/30fps, 4K@30/60fps",
+  "ram": "12 GB",
+  "chipset": "Snapdragon 8 Gen 2",
+  "battery": "5000 mAh",
+  "battery_type": "Li-Ion",
+  "release_date": "2023-02-17",
+  "body": "163.4 x 78.1 x 8.9 mm",
+  "os_type": "Android 13",
+  "storage": "256 GB",
+  "price": 1199
+}
