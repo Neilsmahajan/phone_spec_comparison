@@ -12,6 +12,15 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 function PhoneCard({
   brand_name,
@@ -69,6 +78,47 @@ function PhoneCard({
       }
     } catch (error) {
       console.error('Error deleting device:', error);
+    }
+  };
+
+  const handleUpdate = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!device_id) return;
+
+    const formData = new FormData(event.currentTarget);
+    const updatedData = {
+      device_name: model,
+      device_image_url: formData.get('device_image_url'),
+      display_size: formData.get('display_size'),
+      display_res: formData.get('display_res'),
+      camera: formData.get('camera'),
+      video: formData.get('video'),
+      ram: formData.get('ram'),
+      chipset: formData.get('chipset'),
+      battery: formData.get('battery'),
+      battery_type: formData.get('battery_type'),
+      release_date: formData.get('release_date'),
+      body: formData.get('body'),
+      os_type: formData.get('os_type'),
+      storage: formData.get('storage'),
+      price: parseInt(formData.get('price') as string),
+    };
+
+    try {
+      const response = await fetch(`http://localhost:3001/devices/${device_id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+      });
+
+      if (response.ok) {
+        // You might want to add an onUpdate prop to refresh the data
+        window.location.reload();
+      }
+    } catch (error) {
+      console.error('Error updating device:', error);
     }
   };
 
@@ -164,7 +214,153 @@ function PhoneCard({
           <p className="text-sm text-muted-foreground mt-4">{body}</p>
         )}
       </CardContent>
-      <CardFooter className="pt-4">
+      <CardFooter className="pt-4 flex gap-2">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="default" className="w-full">Update</Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Update {brand_name} {model}</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleUpdate} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="device_image_url">Image URL</Label>
+                  <Input 
+                    id="device_image_url" 
+                    name="device_image_url" 
+                    defaultValue={imageUrl}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="price">Price</Label>
+                  <Input 
+                    id="price" 
+                    name="price" 
+                    type="number" 
+                    defaultValue={price}
+                    min="0"
+                    step="1"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="release_date">Release Date</Label>
+                  <Input 
+                    id="release_date" 
+                    name="release_date" 
+                    type="date" 
+                    defaultValue={releaseDate.split('T')[0]}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="display_size">Display Size</Label>
+                  <Input 
+                    id="display_size" 
+                    name="display_size" 
+                    defaultValue={displaySize}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="display_res">Display Resolution</Label>
+                  <Input 
+                    id="display_res" 
+                    name="display_res" 
+                    defaultValue={displayResolution}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="camera">Camera</Label>
+                  <Input 
+                    id="camera" 
+                    name="camera" 
+                    defaultValue={camera}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="video">Video</Label>
+                  <Input 
+                    id="video" 
+                    name="video" 
+                    defaultValue={video}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="ram">RAM</Label>
+                  <Input 
+                    id="ram" 
+                    name="ram" 
+                    defaultValue={ram}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="storage">Storage</Label>
+                  <Input 
+                    id="storage" 
+                    name="storage" 
+                    defaultValue={storage}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="chipset">Chipset</Label>
+                  <Input 
+                    id="chipset" 
+                    name="chipset" 
+                    defaultValue={chipset}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="battery">Battery</Label>
+                  <Input 
+                    id="battery" 
+                    name="battery" 
+                    defaultValue={battery}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="battery_type">Battery Type</Label>
+                  <Input 
+                    id="battery_type" 
+                    name="battery_type" 
+                    defaultValue={batteryType}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="os_type">OS Type</Label>
+                  <Input 
+                    id="os_type" 
+                    name="os_type" 
+                    defaultValue={osType}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="body">Body</Label>
+                <Input 
+                  id="body" 
+                  name="body" 
+                  defaultValue={body}
+                />
+              </div>
+
+              <Button type="submit" className="w-full">Save Changes</Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" className="w-full">Delete</Button>
