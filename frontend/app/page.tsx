@@ -72,6 +72,25 @@ export default function Home() {
   const [selectedBrands, setSelectedBrands] = useState<number[]>([])
   const [sortOption, setSortOption] = useState("")
   const [devices, setDevices] = useState<Device[]>([])
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    brand_name: "",
+    model: "",
+    price: "",
+    imageUrl: "",
+    releaseDate: "",
+    displaySize: "",
+    displayResolution: "",
+    camera: "",
+    video: "",
+    ram: "",
+    storage: "",
+    chipset: "",
+    battery: "",
+    batteryType: "",
+    osType: "",
+    body: "",
+  });
 
   useEffect(() => {
     const brandIdsParam = selectedBrands.length > 0 ? selectedBrands.join(',') : '';
@@ -105,6 +124,17 @@ export default function Home() {
         console.error('Error fetching devices:', error);
       });
   }, [searchTerm, selectedBrands, sortOption])
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = () => {
+    // Logic to add the device
+    console.log("Device added:", formData);
+    setIsPopupOpen(false); // Close the popup
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -161,7 +191,46 @@ export default function Home() {
             <SelectItem value="dateOldToNew">Oldest to Newest</SelectItem>
           </SelectContent>
         </Select>
+      
+          {/* Add button */}
+          <Button style={{ marginLeft: "16px" }} onClick={() => setIsPopupOpen(true)}>
+          Add
+        </Button>
       </div>
+
+
+      {/* Popup form */}
+      {isPopupOpen && (
+        <div className="popup">
+          <div className="popup-content">
+            <h2>Add New Device</h2>
+            <form>
+              {(Object.keys(formData) as (keyof typeof formData)[]).map((key) => (
+                <div key={key} className="form-group">
+                  <label>{key.replace(/([A-Z])/g, " $1")}</label>
+                  <Input
+                    name={key}
+                    value={formData[key]}
+                    onChange={handleInputChange}
+                    placeholder={`Enter ${key}`}
+                  />
+                </div>
+              ))}
+              <div className="form-actions">
+                <Button type="button" onClick={handleSubmit}>
+                  Submit
+                </Button>
+                <Button type="button" onClick={() => setIsPopupOpen(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      
+      
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {devices
           .filter(device => 
@@ -190,6 +259,38 @@ export default function Home() {
             />
           ))}
       </div>
+      <style jsx>{`
+  .popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+
+  .popup-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    z-index: 1001;
+  }
+
+  .form-group {
+    margin-bottom: 16px;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: space-between;
+  }
+`}</style>
     </div>
   )
 }
