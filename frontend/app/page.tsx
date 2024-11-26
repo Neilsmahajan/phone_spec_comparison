@@ -18,8 +18,24 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, Plus } from 'lucide-react'
 import PhoneCard from '@/components/ui/phoneCard'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { format } from "date-fns"
+import { Calendar } from "@/components/ui/calendar"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
 
 
 const BRAND_MAPPING = [
@@ -65,12 +81,33 @@ const brand_mapping: { [key: string]: string } = {
   '107': 'Google',
 };
 
+type PhoneFormData = {
+  device_id: string;
+  device_name: string;
+  device_image_url: string;
+  brand_id: string;
+  display_size: string;
+  display_res: string;
+  camera: string;
+  video: string;
+  ram: string;
+  chipset: string;
+  battery: string;
+  battery_type: string;
+  release_date: string;
+  body: string;
+  os_type: string;
+  storage: string;
+  price: number;
+}
+
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedBrands, setSelectedBrands] = useState<number[]>([])
   const [sortOption, setSortOption] = useState("")
   const [devices, setDevices] = useState<Device[]>([])
-  const [openDialog, setOpenDialog] = useState(false);
+  const [date, setDate] = useState<Date>()
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const handleDeviceDelete = (deletedId: string) => {
     setDevices(devices.filter(device => device.device_id !== deletedId));
@@ -109,6 +146,50 @@ export default function Home() {
         console.error('Error fetching devices:', error);
       });
   }, [searchTerm, selectedBrands, sortOption])
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    const formData = new FormData(e.currentTarget)
+    
+    const phoneData: PhoneFormData = {
+      device_id: formData.get('device_id') as string,
+      device_name: formData.get('device_name') as string,
+      device_image_url: formData.get('device_image_url') as string,
+      brand_id: formData.get('brand_id') as string,
+      display_size: formData.get('display_size') as string,
+      display_res: formData.get('display_res') as string,
+      camera: formData.get('camera') as string,
+      video: formData.get('video') as string,
+      ram: formData.get('ram') as string,
+      chipset: formData.get('chipset') as string,
+      battery: formData.get('battery') as string,
+      battery_type: formData.get('battery_type') as string,
+      release_date: date ? format(date, 'yyyy-MM-dd') : '',
+      body: formData.get('body') as string,
+      os_type: formData.get('os_type') as string,
+      storage: formData.get('storage') as string,
+      price: parseInt(formData.get('price') as string),
+    }
+
+    try {
+      const response = await fetch('http://localhost:3001/devices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(phoneData),
+      })
+
+      if (response.ok) {
+        setDialogOpen(false)
+        // Optionally refresh the phones list here
+      } else {
+        console.error('Failed to add phone')
+      }
+    } catch (error) {
+      console.error('Error adding phone:', error)
+    }
+  }
 
   return (
     <div className="container mx-auto p-4">
@@ -166,6 +247,144 @@ export default function Home() {
           </SelectContent>
         </Select>
       </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="mb-4">
+            <Plus className="mr-2 h-4 w-4" /> Add Phone
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Add New Phone</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="device_id">Device ID</Label>
+                <Input id="device_id" name="device_id" required />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="device_name">Device Name</Label>
+                <Input id="device_name" name="device_name" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="brand_id">Brand</Label>
+                <Select name="brand_id" required>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select brand" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(brand_mapping).map(([id, brand]) => (
+                      <SelectItem key={id} value={id}>
+                        {brand}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="price">Price</Label>
+                <Input 
+                  id="price" 
+                  name="price" 
+                  type="number" 
+                  min="0" 
+                  step="1"
+                  required 
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="release_date">Release Date</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="device_image_url">Image URL</Label>
+                <Input id="device_image_url" name="device_image_url" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="display_size">Display Size</Label>
+                <Input id="display_size" name="display_size" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="display_res">Display Resolution</Label>
+                <Input id="display_res" name="display_res" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="camera">Camera</Label>
+                <Input id="camera" name="camera" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="video">Video</Label>
+                <Input id="video" name="video" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="ram">RAM</Label>
+                <Input id="ram" name="ram" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="chipset">Chipset</Label>
+                <Input id="chipset" name="chipset" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="battery">Battery</Label>
+                <Input id="battery" name="battery" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="battery_type">Battery Type</Label>
+                <Input id="battery_type" name="battery_type" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="body">Body</Label>
+                <Input id="body" name="body" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="os_type">OS Type</Label>
+                <Input id="os_type" name="os_type" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="storage">Storage</Label>
+                <Input id="storage" name="storage" required />
+              </div>
+            </div>
+
+            <Button type="submit" className="w-full">Add Phone</Button>
+          </form>
+        </DialogContent>
+      </Dialog>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {devices
           .filter(device => 
