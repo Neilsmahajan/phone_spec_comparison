@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -21,8 +20,7 @@ import {
 } from "@/components/ui/select"
 import { ChevronDown } from 'lucide-react'
 import PhoneCard from '@/components/ui/phoneCard'
-import { Badge } from "@/components/ui/badge"
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField } from '@mui/material';
+
 
 const BRAND_MAPPING = [
   { name: 'Nokia', id: 1 },
@@ -65,8 +63,6 @@ const brand_mapping: { [key: string]: string } = {
   '80': 'Xiaomi',
   '95': 'OnePlus',
   '107': 'Google',
-
-  // ... add any other brand mappings
 };
 
 export default function Home() {
@@ -75,28 +71,14 @@ export default function Home() {
   const [sortOption, setSortOption] = useState("")
   const [devices, setDevices] = useState<Device[]>([])
   const [openDialog, setOpenDialog] = useState(false);
-  const [newDevice, setNewDevice] = useState({
-    device_id: '',
-    device_name: '',
-    device_image_url: '',
-    brand_id: '',
-    display_size: '',
-    display_res: '',
-    camera: '',
-    video: '',
-    ram: '',
-    chipset: '',
-    battery: '',
-    battery_type: '',
-    release_date: '',
-    body: '',
-    os_type: '',
-    storage: '',
-    price: ''
-  });
+
+  const handleDeviceDelete = (deletedId: string) => {
+    setDevices(devices.filter(device => device.device_id !== deletedId));
+  };
 
   useEffect(() => {
     const brandIdsParam = selectedBrands.length > 0 ? selectedBrands.join(',') : '';
+
     let baseUrl = 'http://localhost:3001/devices';
 
     // Add sorting routes only if a sort option is selected
@@ -127,43 +109,6 @@ export default function Home() {
         console.error('Error fetching devices:', error);
       });
   }, [searchTerm, selectedBrands, sortOption])
-
-  const handleAddDevice = async () => {
-    try {
-      await fetch('http://localhost:3001/devices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newDevice),
-      });
-      setOpenDialog(false);
-      // Trigger a re-fetch by updating sortOption
-      setSortOption(sortOption);
-      // Reset form
-      setNewDevice({
-        device_id: '',
-        device_name: '',
-        device_image_url: '',
-        brand_id: '',
-        display_size: '',
-        display_res: '',
-        camera: '',
-        video: '',
-        ram: '',
-        chipset: '',
-        battery: '',
-        battery_type: '',
-        release_date: '',
-        body: '',
-        os_type: '',
-        storage: '',
-        price: ''
-      });
-    } catch (error) {
-      console.error('Error adding device:', error);
-    }
-  };
 
   return (
     <div className="container mx-auto p-4">
@@ -220,13 +165,6 @@ export default function Home() {
             <SelectItem value="dateOldToNew">Oldest to Newest</SelectItem>
           </SelectContent>
         </Select>
-        <Button 
-          variant="default" 
-          onClick={() => setOpenDialog(true)}
-          style={{ marginLeft: '10px' }}
-        >
-          Add Device
-        </Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {devices
@@ -254,126 +192,11 @@ export default function Home() {
               body={device.body}
               brand_name={device.brand_name}
               device_id={device.device_id}
+              onDelete={handleDeviceDelete}
             />
           ))}
       </div>
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Add New Device</DialogTitle>
-        <DialogContent>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginTop: '16px' }}>
-            <TextField
-              label="Device ID"
-              value={newDevice.device_id}
-              onChange={(e) => setNewDevice({...newDevice, device_id: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Device Name"
-              value={newDevice.device_name}
-              onChange={(e) => setNewDevice({...newDevice, device_name: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Image URL"
-              value={newDevice.device_image_url}
-              onChange={(e) => setNewDevice({...newDevice, device_image_url: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Brand ID"
-              value={newDevice.brand_id}
-              onChange={(e) => setNewDevice({...newDevice, brand_id: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Display Size"
-              value={newDevice.display_size}
-              onChange={(e) => setNewDevice({...newDevice, display_size: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Display Resolution"
-              value={newDevice.display_res}
-              onChange={(e) => setNewDevice({...newDevice, display_res: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Camera"
-              value={newDevice.camera}
-              onChange={(e) => setNewDevice({...newDevice, camera: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Video"
-              value={newDevice.video}
-              onChange={(e) => setNewDevice({...newDevice, video: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="RAM"
-              value={newDevice.ram}
-              onChange={(e) => setNewDevice({...newDevice, ram: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Chipset"
-              value={newDevice.chipset}
-              onChange={(e) => setNewDevice({...newDevice, chipset: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Battery"
-              value={newDevice.battery}
-              onChange={(e) => setNewDevice({...newDevice, battery: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Battery Type"
-              value={newDevice.battery_type}
-              onChange={(e) => setNewDevice({...newDevice, battery_type: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Release Date"
-              type="date"
-              value={newDevice.release_date}
-              onChange={(e) => setNewDevice({...newDevice, release_date: e.target.value})}
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-            />
-            <TextField
-              label="Body"
-              value={newDevice.body}
-              onChange={(e) => setNewDevice({...newDevice, body: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="OS Type"
-              value={newDevice.os_type}
-              onChange={(e) => setNewDevice({...newDevice, os_type: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Storage"
-              value={newDevice.storage}
-              onChange={(e) => setNewDevice({...newDevice, storage: e.target.value})}
-              fullWidth
-            />
-            <TextField
-              label="Price"
-              value={newDevice.price}
-              onChange={(e) => setNewDevice({...newDevice, price: e.target.value})}
-              fullWidth
-            />
-          </div>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} variant="outline">Cancel</Button>
-          <Button onClick={handleAddDevice} variant="default">
-            Add Device
-          </Button>
-        </DialogActions>
-      </Dialog>
+     
     </div>
   )
 }

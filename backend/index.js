@@ -26,6 +26,7 @@ const pool = new Pool({
 
 // Endpoint to fetch devices based on selected brands
 app.get('/devices', async (req, res) => {
+  console.log('GET /devices endpoint accessed');
   const { brandIds } = req.query;
 
   try {
@@ -52,6 +53,7 @@ app.get('/devices', async (req, res) => {
     }
 
     const { rows } = await pool.query(query, queryParams);
+    console.log('GET /devices successful');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching devices:', error);
@@ -61,6 +63,7 @@ app.get('/devices', async (req, res) => {
 
 // Endpoint to fetch sorted device details (descending)
 app.get('/devices/sort/desc', async (req, res) => {
+  console.log('GET /devices/sort/desc endpoint accessed');
   const { brandIds } = req.query;
   
   try {
@@ -89,6 +92,7 @@ app.get('/devices/sort/desc', async (req, res) => {
     }
 
     const { rows } = await pool.query(query, queryParams);
+    console.log('GET /devices/sort/desc successful');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching sorted devices:', error);
@@ -98,6 +102,7 @@ app.get('/devices/sort/desc', async (req, res) => {
 
 // Endpoint to fetch sorted device details (ascending)
 app.get('/devices/sort/asc', async (req, res) => {
+  console.log('GET /devices/sort/asc endpoint accessed');
   const { brandIds } = req.query;
   
   try {
@@ -126,6 +131,7 @@ app.get('/devices/sort/asc', async (req, res) => {
     }
 
     const { rows } = await pool.query(query, queryParams);
+    console.log('GET /devices/sort/asc successful');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching sorted devices:', error);
@@ -135,6 +141,7 @@ app.get('/devices/sort/asc', async (req, res) => {
 
 // Endpoint to fetch devices sorted by price (ascending)
 app.get('/devices/price/asc', async (req, res) => {
+  console.log('GET /devices/price/asc endpoint accessed');
   const { brandIds } = req.query;
   
   try {
@@ -163,6 +170,7 @@ app.get('/devices/price/asc', async (req, res) => {
     }
 
     const { rows } = await pool.query(query, queryParams);
+    console.log('GET /devices/price/asc successful');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching price-sorted devices:', error);
@@ -172,6 +180,7 @@ app.get('/devices/price/asc', async (req, res) => {
 
 // Endpoint to fetch devices sorted by price (descending)
 app.get('/devices/price/desc', async (req, res) => {
+  console.log('GET /devices/price/desc endpoint accessed');
   const { brandIds } = req.query;
   
   try {
@@ -200,6 +209,7 @@ app.get('/devices/price/desc', async (req, res) => {
     }
 
     const { rows } = await pool.query(query, queryParams);
+    console.log('GET /devices/price/desc successful');
     res.json(rows);
   } catch (error) {
     console.error('Error fetching price-sorted devices:', error);
@@ -209,6 +219,7 @@ app.get('/devices/price/desc', async (req, res) => {
 
 // Endpoint to search devices by name
 app.get('/devices/search', async (req, res) => {
+  console.log('GET /devices/search endpoint accessed');
   const { searchTerm } = req.query;
 
   if (!searchTerm) {
@@ -234,6 +245,7 @@ app.get('/devices/search', async (req, res) => {
       return res.status(404).json({ message: 'No devices found matching the search term' });
     }
 
+    console.log('GET /devices/search successful');
     res.json(rows);
   } catch (error) {
     console.error('Error searching devices:', error);
@@ -243,6 +255,7 @@ app.get('/devices/search', async (req, res) => {
 
 // Endpoint to delete a device and its details
 app.delete('/devices/:deviceId', async (req, res) => {
+  console.log('DELETE /devices/:deviceId endpoint accessed');
   const { deviceId } = req.params;
 
   if (!deviceId) {
@@ -276,6 +289,7 @@ app.delete('/devices/:deviceId', async (req, res) => {
     // Commit transaction
     await pool.query('COMMIT');
 
+    console.log('DELETE /devices/:deviceId successful');
     res.json({ message: `Device ${deviceId} and its details successfully deleted` });
   } catch (error) {
     // Rollback in case of error
@@ -287,6 +301,7 @@ app.delete('/devices/:deviceId', async (req, res) => {
 
 //Endpoint to update device details
 app.put('/devices/:deviceId', async (req, res) => {
+  console.log('PUT /devices/:deviceId endpoint accessed');
   const { deviceId } = req.params;
   const updateData = req.body;
 
@@ -344,6 +359,7 @@ app.put('/devices/:deviceId', async (req, res) => {
       return res.status(404).json({ error: 'Device not found' });
     }
 
+    console.log('PUT /devices/:deviceId successful');
     res.json({
       message: 'Device details updated successfully',
       updatedDevice: rows[0]
@@ -358,6 +374,7 @@ app.put('/devices/:deviceId', async (req, res) => {
 // Endpoint to create a new device 
 
 app.post('/devices', async (req, res) => {
+  console.log('POST /devices endpoint accessed');
   const newDevice = req.body;
 
   try {
@@ -415,6 +432,7 @@ app.post('/devices', async (req, res) => {
     // Commit transaction
     await pool.query('COMMIT');
 
+    console.log('POST /devices successful');
     res.status(201).json({
       message: 'Device created successfully',
       device: result.rows[0]
