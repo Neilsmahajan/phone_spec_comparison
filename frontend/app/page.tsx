@@ -52,6 +52,7 @@ interface Device {
   os_type: string;
   body: string;
   brand_name: string;
+  device_id: string;
 }
 
 const brand_mapping: { [key: string]: string } = {
@@ -105,6 +106,10 @@ export default function Home() {
         console.error('Error fetching devices:', error);
       });
   }, [searchTerm, selectedBrands, sortOption])
+
+  const handleDeviceDelete = (deletedId: string) => {
+    setDevices(devices.filter(device => device.device_id !== deletedId));
+  };
 
   return (
     <div className="container mx-auto p-4">
@@ -187,6 +192,8 @@ export default function Home() {
               osType={device.os_type}
               body={device.body}
               brand_name={device.brand_name}
+              device_id={device.device_id}
+              onDelete={handleDeviceDelete}
             />
           ))}
       </div>

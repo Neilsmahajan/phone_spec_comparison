@@ -1,5 +1,17 @@
 import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 function PhoneCard({
   brand_name,
@@ -18,7 +30,8 @@ function PhoneCard({
   batteryType,
   osType,
   body,
-
+  device_id,
+  onDelete,
 }: {
   brand_name: string;
   model: string;
@@ -36,9 +49,27 @@ function PhoneCard({
   batteryType?: string;
   osType?: string;
   body?: string;
+  device_id?: string;
+  onDelete?: (id: string) => void;
 }) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString();
+  };
+
+  const handleDelete = async () => {
+    if (!device_id) return;
+    
+    try {
+      const response = await fetch(`http://localhost:3001/devices/${device_id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        onDelete?.(device_id);
+      }
+    } catch (error) {
+      console.error('Error deleting device:', error);
+    }
   };
 
   return (
@@ -133,6 +164,25 @@ function PhoneCard({
           <p className="text-sm text-muted-foreground mt-4">{body}</p>
         )}
       </CardContent>
+      <CardFooter className="pt-4">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button variant="destructive" className="w-full">Delete</Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the {brand_name} {model}.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </CardFooter>
     </Card>
   );
 }
